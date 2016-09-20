@@ -110,7 +110,7 @@ class DungeonFloor(DungeonPartition):
         wrange = eval(uin)
         uin = input('\tHeight Percentage Boundary Min, Max: ')
         hrange = eval(uin)
-        uin = input('\tMinimum Acceptable Room Size (blank to copy from partition): ')
+        uin = input('\tMinimum Acceptable Room Size Width, Height (blank to copy from partition): ')
         mdim = mdim if uin == '' else eval(uin)
         d.generate_rooms(wrange, hrange, mdim)
         grid = [['#' for _ in range(d.w)] for _ in range(d.h)]
