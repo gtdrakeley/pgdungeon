@@ -10,3 +10,8 @@ class Rectangle(Point):
         self.w, self.h = w, h
         self.center = Point((self.xe - self.x) // 2,
                             (self.ye - self.y) // 2)
+
+    def grid(self, grid):
+        for x in range(self.x+1, self.xe):
+            for y in range(self.y+1, self.ye):
+                grid[y][x] = ' '
