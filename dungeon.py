@@ -91,6 +91,36 @@ class DungeonFloor(DungeonPartition):
             # return self.fpart.partition(depth-1) + self.spart.partition(depth-1)
         return self.fpart.partition(depth - 1, mdim, bdim) + self.spart.partition(depth - 1, mdim, bdim)
 
+    @staticmethod
+    def from_prompts():
+        print('Generate Floor')
+        uin = input('\tWidth, Height: ')
+        w, h = eval(uin)
+        d = DungeonFloor(w, h)
+        print('Partitioning')
+        uin = input('\tNumber of Splits: ')
+        depth = int(uin)
+        uin = input('\tMinimum Partition Width, Height: ')
+        mdim = eval(uin)
+        uin = input('\tAcceptable Partition Width, Height: ')
+        bdim = eval(uin)
+        d.partition(depth, mdim, bdim)
+        print('Generating Rooms')
+        uin = input('\tWidth Percentage Boundary Min, Max: ')
+        wrange = eval(uin)
+        uin = input('\tHeight Percentage Boundary Min, Max: ')
+        hrange = eval(uin)
+        uin = input('\tMinimum Acceptable Room Size (blank to copy from partition): ')
+        mdim = mdim if uin == '' else eval(uin)
+        d.generate_rooms(wrange, hrange, mdim)
+        grid = [['#' for _ in range(d.w)] for _ in range(d.h)]
+        d.gridify(grid)
+        s = '\n'.join(''.join(row) for row in grid)
+        print()
+        print()
+        print(s)
+
+
     """
     def partition(self, depth, ):
         if depth < 1:
@@ -108,6 +138,7 @@ class DungeonFloor(DungeonPartition):
     """
 
 if __name__ == '__main__':
+    """
     init = input('W, H, R: ').split()
     d = DungeonFloor(int(init[0]), int(init[1]))
     print('\n')
@@ -118,3 +149,5 @@ if __name__ == '__main__':
     d.gridify(grid)
     s = '\n'.join(''.join(row) for row in grid)
     print(s)
+    """
+    DungeonFloor.from_prompts()
