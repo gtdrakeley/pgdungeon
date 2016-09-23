@@ -1,6 +1,7 @@
 import random
 import geometry
 import room
+import math
 
 
 class DungeonPartition(geometry.Rectangle):
@@ -10,43 +11,43 @@ class DungeonPartition(geometry.Rectangle):
         self.spart = None
         self.feature = None
 
-    def partition(self, depth, mdim=(2, 2), bdim=None):
-        if not bdim:
-            bdim = mdim
+    def partition(self, depth, variance=0.0):
         if depth < 1:
             return 1
-        elif self.w <= bdim[0] and self.h <= bdim[1]:
-            return 1
-        elif self.w <= mdim[0] * 2 and self.h <= mdim[1] * 2:
-            return 1
-        elif self.w <= mdim[0] * 2 or self.w <= bdim[0]:
-            bound = random.randint(mdim[1], self.h-mdim[1])
-            self.fpart = DungeonPartition(self.x, self.y, self.w, bound)
-            self.spart = DungeonPartition(self.x, self.y+bound, self.w, self.h-bound)
-        elif self.h <= mdim[1] * 2 or self.h <= bdim[1]:
-            bound = random.randint(mdim[0], self.w-mdim[0])
-            self.fpart = DungeonPartition(self.x, self.y, bound, self.h)
-            self.spart = DungeonPartition(self.x+bound, self.y, self.w-bound, self.h)
         elif random.random() < 0.5:
-            # bound = self.w // 2
-            bound = random.randint(mdim[0], self.w-mdim[0])
+            offset = self.w * variance
+            bound = random.randint(math.floor(self.w/2 - offset), math.ceil(self.w/2 + offset))
             self.fpart = DungeonPartition(self.x, self.y, bound, self.h)
             self.spart = DungeonPartition(self.x+bound, self.y, self.w-bound, self.h)
-            # return self.fpart.partition(depth-1) + self.spart.partition(depth-1)
+            '''
+            print('Vertical')
+            print('\tOffset, Bound:', offset, bound)
+            print('\tPart1 x, y, w, h:', self.x, self.y, bound, self.h)
+            print('\tPart2 x, y, w, h:', self.x+bound, self.y, self.w-bound, self.h)
+            '''
         else:
-            # bound = self.h // 2
-            bound = random.randint(mdim[1], self.h-mdim[1])
+            offset = self.h * variance
+            bound = random.randint(math.floor(self.h/2 - offset), math.ceil(self.h/2 + offset))
             self.fpart = DungeonPartition(self.x, self.y, self.w, bound)
             self.spart = DungeonPartition(self.x, self.y+bound, self.w, self.h-bound)
-            # return self.fpart.partition(depth-1) + self.spart.partition(depth-1)
-        return self.fpart.partition(depth - 1, mdim, bdim) + self.spart.partition(depth - 1, mdim, bdim)
+            '''
+            print('Horizontal')
+            print('\tOffset, Bound:', offset, bound)
+            print('\tPart1 x, y, w, h:', self.x, self.y, self.w, bound)
+            print('\tPart2 x, y, w, h:', self.x, self.y+bound, self.w, self.h-bound)
+            '''
+        '''
+        input('[ENTER]')
+        print()
+        '''
+        return self.fpart.partition(depth-1, variance) + self.spart.partition(depth-1, variance)
 
-    def generate_rooms(self, wrange, hrange, mdim=None):
+    def generate_rooms(self, vinterval=(1.0, 1.0)):
         if self.fpart:
-            self.fpart.generate_rooms(wrange, hrange, mdim)
-            self.spart.generate_rooms(wrange, hrange, mdim)
+            self.fpart.generate_rooms(vinterval)
+            self.spart.generate_rooms(vinterval)
         else:
-            self.feature = room.Room.from_constraints((self.x, self.y), (self.w, self.h), wrange, hrange)
+            self.feature = room.Room.from_constraints((self.x, self.y), (self.w, self.h), vinterval)
 
     def gridify(self, grid):
         if self.fpart:
@@ -60,94 +61,57 @@ class DungeonFloor(DungeonPartition):
     def __init__(self, w, h):
         super().__init__(0, 0, w, h)
 
-    def partition(self, depth, mdim=(2, 2), bdim=None):
-        if not bdim:
-            bdim = mdim
+    def partition(self, depth, variance=0.0):
         if depth < 1:
             return 1
-        elif self.w <= bdim[0] and self.h <= bdim[1]:
-            return 1
-        elif self.w <= mdim[0] * 2 and self.h <= mdim[1] * 2:
-            return 1
-        elif self.w <= mdim[0] * 2 or self.w <= bdim[0]:
-            bound = random.randint(mdim[1], self.h-mdim[1])
-            self.fpart = DungeonPartition(self.x, self.y, self.w-1, bound)
-            self.spart = DungeonPartition(self.x, self.y+bound, self.w-1, (self.h-1)-bound)
-        elif self.h <= mdim[1] * 2 or self.h <= bdim[1]:
-            bound = random.randint(mdim[0], self.w-mdim[0])
-            self.fpart = DungeonPartition(self.x, self.y, bound, self.h-1)
-            self.spart = DungeonPartition(self.x+bound, self.y, (self.w-1)-bound, self.h-1)
         elif random.random() < 0.5:
-            # bound = self.w // 2
-            bound = random.randint(mdim[0], self.w-mdim[0])
+            offset = self.w * variance
+            bound = random.randint(math.floor(self.w/2 - offset), math.ceil(self.w/2 + offset))
             self.fpart = DungeonPartition(self.x, self.y, bound, self.h-1)
-            self.spart = DungeonPartition(self.x+bound, self.y, (self.w-1)-bound, self.h-1)
-            # return self.fpart.partition(depth-1) + self.spart.partition(depth-1)
+            self.spart = DungeonPartition(self.x+bound, self.y, self.w-bound-1, self.h-1)
+            '''
+            print('Vertical')
+            print('\tOffset, Bound:', offset, bound)
+            print('\tPart1 x, y, w, h:', self.x, self.y, bound, self.h-1)
+            print('\tPart2 x, y, w, h:', self.x+bound, self.y, self.w-bound-1, self.h-1)
+            '''
         else:
-            # bound = self.h // 2
-            bound = random.randint(mdim[1], self.h-mdim[1])
+            offset = self.h * variance
+            bound = random.randint(math.floor(self.h/2 - offset), math.ceil(self.h/2 + offset))
             self.fpart = DungeonPartition(self.x, self.y, self.w-1, bound)
-            self.spart = DungeonPartition(self.x, self.y+bound, self.w-1, (self.h-1)-bound)
-            # return self.fpart.partition(depth-1) + self.spart.partition(depth-1)
-        return self.fpart.partition(depth - 1, mdim, bdim) + self.spart.partition(depth - 1, mdim, bdim)
+            self.spart = DungeonPartition(self.x, self.y+bound, self.w-1, self.h-bound-1)
+            '''
+            print('Horizontal')
+            print('\tOffset, Bound:', offset, bound)
+            print('\tPart1 x, y, w, h:', self.x, self.y, self.w-1, bound)
+            print('\tPart2 x, y, w, h:', self.x, self.y+bound, self.w-1, self.h-bound-1)
+            '''
+        '''
+        input('[ENTER]')
+        print()
+        '''
+        return self.fpart.partition(depth-1, variance) + self.spart.partition(depth-1, variance)
 
     @staticmethod
     def from_prompts():
-        print('Generate Floor')
-        uin = input('\tWidth, Height: ')
+        uin = input('Floor Width, Height: ')
         w, h = eval(uin)
         d = DungeonFloor(w, h)
         print('Partitioning')
         uin = input('\tNumber of Splits: ')
         depth = int(uin)
-        uin = input('\tMinimum Partition Width, Height: ')
-        mdim = eval(uin)
-        uin = input('\tAcceptable Partition Width, Height: ')
-        bdim = eval(uin)
-        d.partition(depth, mdim, bdim)
-        print('Generating Rooms')
-        uin = input('\tWidth Percentage Boundary Min, Max: ')
-        wrange = eval(uin)
-        uin = input('\tHeight Percentage Boundary Min, Max: ')
-        hrange = eval(uin)
-        uin = input('\tMinimum Acceptable Room Size Width, Height (blank to copy from partition): ')
-        mdim = mdim if uin == '' else eval(uin)
-        d.generate_rooms(wrange, hrange, mdim)
+        uin = input('\tPartition Variance: ')
+        variance = eval(uin)
+        d.partition(depth, variance)
+        uin = input('Room Variance Interval: ')
+        vinterval = eval(uin)
+        d.generate_rooms(vinterval)
         grid = [['#' for _ in range(d.w)] for _ in range(d.h)]
         d.gridify(grid)
         s = '\n'.join(''.join(row) for row in grid)
-        print()
-        print()
-        print(s)
+        print('\n\n{}'.format(s))
+        return d
 
-
-    """
-    def partition(self, depth, ):
-        if depth < 1:
-            return 1
-        elif random.random() < 0.5:
-            bound = (self.w - 1) // 2
-            self.fpart = DungeonPartition(self.x, self.y, bound, self.h-1)
-            self.spart = DungeonPartition(self.x+bound, self.y, (self.w-1)-bound, self.h-1)
-            return self.fpart.partition(depth-1) + self.spart.partition(depth-1)
-        else:
-            bound = (self.h - 1) // 2
-            self.fpart = DungeonPartition(self.x, self.y, self.w-1, bound)
-            self.spart = DungeonPartition(self.x, self.y+bound, self.w-1, (self.h-1)-bound)
-            return self.fpart.partition(depth-1) + self.spart.partition(depth-1)
-    """
 
 if __name__ == '__main__':
-    """
-    init = input('W, H, R: ').split()
-    d = DungeonFloor(int(init[0]), int(init[1]))
-    print('\n')
-    print("Number of Rooms: ", d.partition(int(init[2])))
-    print()
-    d.generate_rooms((100, 100), (100, 100))
-    grid = [['#' for _ in range(d.w)] for _ in range(d.h)]
-    d.gridify(grid)
-    s = '\n'.join(''.join(row) for row in grid)
-    print(s)
-    """
     DungeonFloor.from_prompts()
