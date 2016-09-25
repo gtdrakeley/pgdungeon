@@ -15,7 +15,7 @@ class DungeonPartition(geometry.Rectangle):
         if depth < 1:
             return 1
         elif random.random() < 0.5:
-            offset = self.w * variance
+            offset = self.w / 2 * variance
             bound = random.randint(math.floor(self.w/2 - offset), math.ceil(self.w/2 + offset))
             self.fpart = DungeonPartition(self.x, self.y, bound, self.h)
             self.spart = DungeonPartition(self.x+bound, self.y, self.w-bound, self.h)
@@ -26,7 +26,7 @@ class DungeonPartition(geometry.Rectangle):
             print('\tPart2 x, y, w, h:', self.x+bound, self.y, self.w-bound, self.h)
             '''
         else:
-            offset = self.h * variance
+            offset = self.h / 2 * variance
             bound = random.randint(math.floor(self.h/2 - offset), math.ceil(self.h/2 + offset))
             self.fpart = DungeonPartition(self.x, self.y, self.w, bound)
             self.spart = DungeonPartition(self.x, self.y+bound, self.w, self.h-bound)
@@ -65,7 +65,7 @@ class DungeonFloor(DungeonPartition):
         if depth < 1:
             return 1
         elif random.random() < 0.5:
-            offset = self.w * variance
+            offset = (self.w-1) / 2 * variance
             bound = random.randint(math.floor(self.w/2 - offset), math.ceil(self.w/2 + offset))
             self.fpart = DungeonPartition(self.x, self.y, bound, self.h-1)
             self.spart = DungeonPartition(self.x+bound, self.y, self.w-bound-1, self.h-1)
@@ -76,7 +76,7 @@ class DungeonFloor(DungeonPartition):
             print('\tPart2 x, y, w, h:', self.x+bound, self.y, self.w-bound-1, self.h-1)
             '''
         else:
-            offset = self.h * variance
+            offset = (self.h-1) / 2 * variance
             bound = random.randint(math.floor(self.h/2 - offset), math.ceil(self.h/2 + offset))
             self.fpart = DungeonPartition(self.x, self.y, self.w-1, bound)
             self.spart = DungeonPartition(self.x, self.y+bound, self.w-1, self.h-bound-1)
